@@ -9,9 +9,12 @@ import { toast } from "@/hooks/use-toast";
 type AppState = "upload" | "preview" | "processing" | "result";
 
 interface AnalysisResult {
-  verdict: "REAL" | "FAKE";
-  confidence: number;
+  verdict: "REAL" | "FAKE" | "Unable to Predict";
+  confidence: number | null;
   processingTime: number;
+  probability_fake: number;
+  media_type: string;
+  file_name: string;
 }
 
 const Index = () => {
@@ -70,8 +73,11 @@ const Index = () => {
 
       setResult({
         verdict: data.prediction,
-        confidence: Math.round(data.confidence * 100),
+        confidence: data.confidence ? Math.round(data.confidence * 100) : null,
         processingTime: parseFloat(processingTime),
+        probability_fake: data.probability_fake,
+        media_type: data.media_type,
+        file_name: data.file_name,
       });
 
       setState("result");
@@ -162,6 +168,9 @@ const Index = () => {
                 verdict={result.verdict}
                 confidence={result.confidence}
                 processingTime={result.processingTime}
+                probability_fake={result.probability_fake}
+                media_type={result.media_type}
+                file_name={result.file_name}
                 onReset={handleReset}
               />
             )}

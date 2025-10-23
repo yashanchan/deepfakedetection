@@ -3,17 +3,30 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ResultDisplayProps {
-  verdict: "REAL" | "FAKE";
-  confidence: number;
+  verdict: "REAL" | "FAKE" | "Unable to Predict";
+  confidence: number | null;
   processingTime: number;
+  probability_fake: number;
+  media_type: string;
+  file_name: string;
   onReset: () => void;
 }
 
-export const ResultDisplay = ({ verdict, confidence, processingTime, onReset }: ResultDisplayProps) => {
+export const ResultDisplay = ({ 
+  verdict, 
+  confidence, 
+  processingTime, 
+  probability_fake, 
+  media_type, 
+  file_name, 
+  onReset 
+}: ResultDisplayProps) => {
   const isReal = verdict === "REAL";
-  const isEdgeCase = confidence >= 40 && confidence <= 60;
+  const isUncertain = verdict === "Unable to Predict";
+  const isEdgeCase = confidence !== null && confidence >= 40 && confidence <= 60;
   
   const getVerdictColor = () => {
+    if (isUncertain) return "warning";
     if (isReal && !isEdgeCase) return "success";
     if (!isReal && !isEdgeCase) return "destructive";
     return "warning";
@@ -61,7 +74,9 @@ export const ResultDisplay = ({ verdict, confidence, processingTime, onReset }: 
                   color === "warning" && "bg-warning"
                 )}
               >
-                {isReal ? (
+                {isUncertain ? (
+                  <AlertTriangle className="w-12 h-12 text-white" />
+                ) : isReal ? (
                   <CheckCircle className="w-12 h-12 text-white" />
                 ) : (
                   <XCircle className="w-12 h-12 text-white" />
@@ -82,7 +97,9 @@ export const ResultDisplay = ({ verdict, confidence, processingTime, onReset }: 
               {verdict}
             </h2>
             <p className="text-muted-foreground text-lg">
-              {isReal
+              {isUncertain
+                ? "Unable to determine authenticity with confidence"
+                : isReal
                 ? "This media appears to be authentic"
                 : "This media shows signs of manipulation"}
             </p>
@@ -92,18 +109,35 @@ export const ResultDisplay = ({ verdict, confidence, processingTime, onReset }: 
             <div>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Confidence Level</span>
-                <span className="text-sm font-bold">{confidence}%</span>
+                <span className="text-sm font-bold">
+                  {confidence !== null ? `${confidence}%` : "N/A"}
+                </span>
               </div>
-              <div className="h-4 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className={cn(
-                    "h-full transition-all duration-1000",
-                    color === "success" && "bg-gradient-success shadow-glow-success",
-                    color === "destructive" && "bg-gradient-danger shadow-glow-danger",
-                    color === "warning" && "bg-warning"
-                  )}
-                  style={{ width: `${confidence}%` }}
-                />
+              {confidence !== null && (
+                <div className="h-4 bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full transition-all duration-1000",
+                      color === "success" && "bg-gradient-success shadow-glow-success",
+                      color === "destructive" && "bg-gradient-danger shadow-glow-danger",
+                      color === "warning" && "bg-warning"
+                    )}
+                    style={{ width: `${confidence}%` }}
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Media Type:</span>
+                <span className="ml-2 font-medium capitalize">{media_type}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Fake Probability:</span>
+                <span className="ml-2 font-medium">
+                  {Math.round(probability_fake * 100)}%
+                </span>
               </div>
             </div>
             

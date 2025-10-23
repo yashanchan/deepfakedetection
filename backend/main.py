@@ -1,6 +1,6 @@
 """
 FastAPI Backend for Deepfake Detection
-This server handles media uploads and runs inference using a PyTorch model.
+This server handles media uploads and runs inference using the trained ResNet-LSTM-Transformer model.
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -13,7 +13,10 @@ from pathlib import Path
 import tempfile
 import logging
 from typing import Dict, Any
-import mediapipe as mp
+import os
+
+# Import our custom model
+from models.deepfake_model import DeepfakeDetector
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,164 +34,68 @@ app.add_middleware(
 )
 
 # Global variables for model
-model = None
+detector = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# MediaPipe face detection
-mp_face_detection = mp.solutions.face_detection
-face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
 
-
-class DeepfakeModel:
+def validate_file_type(file: UploadFile) -> bool:
     """
-    Placeholder for your ResNet-LSTM-Transformer model.
-    Replace this with your actual model implementation.
-    """
-    
-    def __init__(self, model_path: str = None):
-        """
-        Initialize your model here.
-        
-        Args:
-            model_path: Path to your trained model weights
-        """
-        self.device = device
-        logger.info(f"Using device: {self.device}")
-        
-        # TODO: Load your pre-trained model here
-        # Example:
-        # self.model = YourModelClass()
-        # if model_path:
-        #     self.model.load_state_dict(torch.load(model_path, map_location=self.device))
-        # self.model.to(self.device)
-        # self.model.eval()
-        
-        logger.info("Model initialized (placeholder)")
-    
-    def preprocess_image(self, image: np.ndarray) -> torch.Tensor:
-        """
-        Preprocess image for model input.
-        
-        Args:
-            image: Input image as numpy array
-            
-        Returns:
-            Preprocessed tensor ready for model
-        """
-        # TODO: Implement your preprocessing pipeline
-        # Example preprocessing:
-        # - Resize to model input size (e.g., 224x224)
-        # - Normalize with ImageNet stats
-        # - Convert to tensor
-        
-        # Placeholder preprocessing
-        image = cv2.resize(image, (224, 224))
-        image = image.astype(np.float32) / 255.0
-        image = torch.from_numpy(image).permute(2, 0, 1).unsqueeze(0)
-        return image.to(self.device)
-    
-    def preprocess_video(self, video_path: str, max_frames: int = 32) -> torch.Tensor:
-        """
-        Extract and preprocess frames from video.
-        
-        Args:
-            video_path: Path to video file
-            max_frames: Maximum number of frames to extract
-            
-        Returns:
-            Preprocessed tensor of video frames
-        """
-        cap = cv2.VideoCapture(video_path)
-        frames = []
-        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        
-        # Sample frames evenly throughout video
-        frame_indices = np.linspace(0, frame_count - 1, max_frames, dtype=int)
-        
-        for idx in frame_indices:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-            ret, frame = cap.read()
-            if ret:
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frames.append(frame)
-        
-        cap.release()
-        
-        if not frames:
-            raise ValueError("No frames extracted from video")
-        
-        # TODO: Implement your video preprocessing
-        # Process frames according to your model requirements
-        
-        # Placeholder: just return preprocessed first frame
-        return self.preprocess_image(frames[0])
-    
-    def predict(self, input_tensor: torch.Tensor) -> Dict[str, Any]:
-        """
-        Run inference on preprocessed input.
-        
-        Args:
-            input_tensor: Preprocessed input tensor
-            
-        Returns:
-            Dictionary with prediction and confidence
-        """
-        # TODO: Replace with your actual model inference
-        # Example:
-        # with torch.no_grad():
-        #     output = self.model(input_tensor)
-        #     probability_fake = torch.sigmoid(output).item()
-        
-        # Placeholder: return mock prediction
-        # Replace this with actual model output
-        probability_fake = 0.75  # Mock value
-        
-        # Determine verdict based on probability
-        if probability_fake < 0.4:
-            verdict = "REAL"
-        elif probability_fake > 0.6:
-            verdict = "FAKE"
-        else:
-            # Edge case: classify based on which threshold is closer
-            verdict = "FAKE" if probability_fake >= 0.5 else "REAL"
-        
-        return {
-            "prediction": verdict,
-            "confidence": probability_fake if verdict == "FAKE" else (1 - probability_fake),
-            "probability_fake": probability_fake
-        }
-
-
-def detect_faces(image: np.ndarray) -> bool:
-    """
-    Detect if image contains faces using MediaPipe.
+    Validate if the uploaded file is a supported image or video format.
     
     Args:
-        image: Input image as numpy array
+        file: Uploaded file
         
     Returns:
-        True if faces detected, False otherwise
+        True if file type is supported, False otherwise
     """
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = face_detection.process(image_rgb)
-    return results.detections is not None and len(results.detections) > 0
+    allowed_image_types = ["image/png", "image/jpeg", "image/jpg"]
+    allowed_video_types = ["video/mp4", "video/avi", "video/mov", "video/mkv"]
+    
+    return file.content_type in allowed_image_types + allowed_video_types
+
+
+def validate_file_size(file: UploadFile) -> bool:
+    """
+    Validate if the uploaded file size is within limits.
+    
+    Args:
+        file: Uploaded file
+        
+    Returns:
+        True if file size is acceptable, False otherwise
+    """
+    allowed_image_types = ["image/png", "image/jpeg", "image/jpg"]
+    max_size = 100 * 1024 * 1024  # 100MB for videos
+    if file.content_type in allowed_image_types:
+        max_size = 10 * 1024 * 1024  # 10MB for images
+    
+    # Read file content to check size
+    content = file.file.read()
+    file.file.seek(0)  # Reset file pointer
+    
+    return len(content) <= max_size
 
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize model on startup."""
-    global model
+    global detector
     
-    # TODO: Provide path to your trained model weights
-    model_path = "models/deepfake_detector.pth"  # Update this path
+    # Path to the trained model weights
+    model_path = "models/best_unified_model.pth"
+    
+    # Check if model file exists
+    if not os.path.exists(model_path):
+        logger.error(f"Model file not found at: {model_path}")
+        logger.error("Please ensure the trained model file is placed in the models/ directory")
+        return
     
     try:
-        model = DeepfakeModel(model_path)
-        logger.info("Model loaded successfully")
+        detector = DeepfakeDetector(model_path, device=str(device))
+        logger.info("Deepfake detector loaded successfully")
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
-        # Initialize with placeholder anyway
-        model = DeepfakeModel()
+        detector = None
 
 
 @app.get("/")
@@ -197,7 +104,8 @@ async def root():
     return {
         "status": "online",
         "message": "Deepfake Detection API",
-        "device": str(device)
+        "device": str(device),
+        "model_loaded": detector is not None
     }
 
 
@@ -212,64 +120,52 @@ async def analyze_media(file: UploadFile = File(...)):
     Returns:
         JSON with prediction result and confidence
     """
-    if not model:
+    if not detector:
         raise HTTPException(status_code=503, detail="Model not initialized")
     
     # Validate file type
-    allowed_image_types = ["image/png", "image/jpeg", "image/jpg"]
-    allowed_video_types = ["video/mp4", "video/avi", "video/mov"]
-    
-    if file.content_type not in allowed_image_types + allowed_video_types:
+    if not validate_file_type(file):
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported file type: {file.content_type}"
+            detail=f"Unsupported file type: {file.content_type}. Supported types: images (PNG, JPEG) and videos (MP4, AVI, MOV, MKV)"
         )
     
     # Validate file size
-    max_size = 100 * 1024 * 1024  # 100MB for videos
-    if file.content_type in allowed_image_types:
-        max_size = 10 * 1024 * 1024  # 10MB for images
+    if not validate_file_size(file):
+        allowed_image_types = ["image/png", "image/jpeg", "image/jpg"]
+        max_size = 100 if file.content_type not in allowed_image_types else 10
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Max size: {max_size}MB"
+        )
     
     try:
         # Save uploaded file temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix) as tmp_file:
             content = await file.read()
-            
-            if len(content) > max_size:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"File too large. Max size: {max_size / (1024*1024):.0f}MB"
-                )
-            
             tmp_file.write(content)
             tmp_path = tmp_file.name
         
-        # Process based on file type
-        if file.content_type in allowed_image_types:
-            # Read and validate image
-            image = cv2.imread(tmp_path)
-            if image is None:
-                raise HTTPException(status_code=400, detail="Invalid image file")
-            
-            # Check for faces
-            if not detect_faces(image):
-                logger.warning("No faces detected in image")
-                # You can choose to reject or continue with analysis
-            
-            # Preprocess and predict
-            input_tensor = model.preprocess_image(image)
-            result = model.predict(input_tensor)
-            
-        else:  # Video
-            # Preprocess video and predict
-            input_tensor = model.preprocess_video(tmp_path)
-            result = model.predict(input_tensor)
+        # Run prediction using our detector
+        result = detector.predict(tmp_path)
         
         # Clean up temporary file
         Path(tmp_path).unlink()
         
-        logger.info(f"Analysis complete: {result}")
-        return JSONResponse(content=result)
+        if not result['success']:
+            raise HTTPException(status_code=400, detail=result['error'])
+        
+        # Format response
+        response = {
+            "prediction": result['prediction'],
+            "confidence": result['confidence'],
+            "probability_fake": result['probability_fake'],
+            "media_type": result['media_type'],
+            "file_name": result['file_name']
+        }
+        
+        logger.info(f"Analysis complete: {response}")
+        return JSONResponse(content=response)
         
     except HTTPException:
         raise
@@ -283,9 +179,10 @@ async def health_check():
     """Detailed health check endpoint."""
     return {
         "status": "healthy",
-        "model_loaded": model is not None,
+        "model_loaded": detector is not None,
         "device": str(device),
-        "cuda_available": torch.cuda.is_available()
+        "cuda_available": torch.cuda.is_available(),
+        "model_path": "models/best_unified_model.pth"
     }
 
 
