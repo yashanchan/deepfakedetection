@@ -401,10 +401,7 @@ class DeepfakeDetector:
                 prob_fake = torch.sigmoid(output).item()
             
             # Determine prediction and confidence
-            if self.uncertain_low < prob_fake < self.uncertain_high:
-                prediction = "Unable to Predict"
-                confidence = None
-            elif prob_fake >= self.uncertain_high:
+            if prob_fake >= 0.5:
                 prediction = "FAKE"
                 confidence = prob_fake
             else:

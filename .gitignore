@@ -16,14 +16,12 @@ frontend/*.local
 # Backend Python cache
 backend/__pycache__/
 backend/models/__pycache__/
+backend/models/best_unified_model.pth
 *.pyc
 *.pyo
 *.pyd
 __pycache__/
 
-# Model files (optional - uncomment if you don't want to track model files)
-# backend/models/*.pth
-# backend/models/*.pkl
 
 # Editor directories and files
 .vscode/*
