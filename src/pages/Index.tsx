@@ -34,40 +34,65 @@ const Index = () => {
     setState("upload");
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
+
     setState("processing");
     setProgress(0);
     
-    // Simulate processing with progress updates
     const startTime = Date.now();
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          
-          // Simulate analysis result (replace with actual API call)
-          const mockConfidence = Math.floor(Math.random() * 100);
-          const mockVerdict = mockConfidence < 40 ? "REAL" : mockConfidence > 60 ? "FAKE" : Math.random() > 0.5 ? "REAL" : "FAKE";
-          const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
-          
-          setResult({
-            verdict: mockVerdict,
-            confidence: mockConfidence,
-            processingTime: parseFloat(processingTime),
-          });
-          
-          setState("result");
-          
-          toast({
-            title: "Analysis complete",
-            description: `Media classified as ${mockVerdict}`,
-          });
-          
-          return 100;
-        }
-        return prev + Math.random() * 15;
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => Math.min(prev + Math.random() * 10, 95));
+    }, 300);
+
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      // TODO: Replace with your actual FastAPI backend URL
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      
+      const response = await fetch(`${API_URL}/analyze`, {
+        method: "POST",
+        body: formData,
       });
-    }, 200);
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      setResult({
+        verdict: data.prediction,
+        confidence: Math.round(data.confidence * 100),
+        processingTime: parseFloat(processingTime),
+      });
+
+      setState("result");
+
+      toast({
+        title: "Analysis complete",
+        description: `Media classified as ${data.prediction}`,
+      });
+    } catch (error) {
+      clearInterval(progressInterval);
+      console.error("Analysis error:", error);
+      
+      toast({
+        title: "Analysis failed",
+        description: error instanceof Error ? error.message : "Failed to analyze media. Please try again.",
+        variant: "destructive",
+      });
+      
+      setState("preview");
+      setProgress(0);
+    }
   };
 
   const handleReset = () => {
