@@ -8,50 +8,50 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 98%; /* near-white */
+    --foreground: 222 25% 12%; /* dark gray text */
 
-    --card: 222 47% 14%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 25% 12%;
 
-    --popover: 222 47% 14%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 25% 12%;
 
-    --primary: 189 94% 43%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 270 84% 56%; /* purple accent */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 47% 18%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 6% 96%; /* light gray for chips/cards */
+    --secondary-foreground: 222 25% 12%;
 
-    --muted: 222 47% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 6% 94%;
+    --muted-foreground: 222 12% 40%;
 
-    --accent: 189 94% 43%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 270 84% 56%;
+    --accent-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 210 40% 98%;
+    --success: 142 50% 40%;
+    --success-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --warning: 43 96% 56%;
-    --warning-foreground: 222 47% 11%;
+    --warning: 43 96% 50%;
+    --warning-foreground: 222 25% 12%;
 
-    --border: 222 47% 25%;
-    --input: 222 47% 20%;
-    --ring: 189 94% 43%;
+    --border: 240 11% 90%;
+    --input: 240 11% 90%;
+    --ring: 270 84% 56%;
 
     --radius: 0.75rem;
 
-    --gradient-mesh: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(222 47% 14%) 50%, hsl(189 94% 13%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(189 94% 43%) 0%, hsl(189 94% 53%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 76% 46%) 100%);
-    --gradient-danger: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(0 84% 70%) 100%);
+    --gradient-mesh: linear-gradient(180deg, hsl(0 0% 99%) 0%, hsl(0 0% 98%) 50%, hsl(240 6% 96%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(270 84% 56%) 0%, hsl(270 84% 64%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 50% 40%) 0%, hsl(142 50% 50%) 100%);
+    --gradient-danger: linear-gradient(135deg, hsl(0 84% 55%) 0%, hsl(0 84% 65%) 100%);
     
-    --shadow-glow: 0 0 20px hsl(189 94% 43% / 0.3);
-    --shadow-glow-success: 0 0 20px hsl(142 76% 36% / 0.3);
-    --shadow-glow-danger: 0 0 20px hsl(0 84% 60% / 0.3);
+    --shadow-glow: 0 0 24px hsl(270 84% 56% / 0.25);
+    --shadow-glow-success: 0 0 24px hsl(142 50% 40% / 0.25);
+    --shadow-glow-danger: 0 0 24px hsl(0 84% 55% / 0.25);
   }
 }
 
@@ -62,5 +62,6 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   }
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shield } from "lucide-react";
+import { Cpu, Zap, ShieldCheck, Brain, Layers, Activity, CircuitBoard, Grid3X3, Clock, GitMerge, Sparkles, CheckCircle2 } from "lucide-react";
 import { UploadZone } from "@/components/UploadZone";
 import { FilePreview } from "@/components/FilePreview";
 import { ProcessingState } from "@/components/ProcessingState";
@@ -120,35 +120,62 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-mesh">
-      {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/30 rounded-lg blur-lg" />
-              <div className="relative bg-gradient-primary p-2 rounded-lg">
-                <Shield className="w-6 h-6 text-primary-foreground" />
+      {/* Top Bar with Logo and Project Name */}
+      <header className="sticky top-0 z-50">
+        <div className="border-b border-border bg-background/80 backdrop-blur">
+          <div className="container mx-auto px-6 py-6">
+            <div className="flex items-center justify-between">
+              {/* College Logo */}
+              <div className="flex items-center">
+                <img 
+                  src="/college-logo.png" 
+                  alt="College Logo" 
+                  className="h-32 w-auto object-contain max-w-[400px]"
+                  onError={(e) => {
+                    // Fallback placeholder if logo doesn't exist
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const placeholder = document.getElementById('logo-placeholder');
+                    if (placeholder) placeholder.style.display = 'flex';
+                  }}
+                />
+                <div 
+                  id="logo-placeholder"
+                  className="h-32 w-64 border-2 border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center bg-secondary/50"
+                  style={{ display: 'none' }}
+                >
+                  <span className="text-base text-muted-foreground">College Logo</span>
+                </div>
               </div>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">DeepGuard AI</h1>
-              <p className="text-sm text-muted-foreground">Advanced Deepfake Detection</p>
+              
+              {/* Project Name */}
+              <div className="flex items-center">
+                <h1 className="text-5xl font-bold font-sans tracking-tight">
+                  <span style={{ color: 'hsl(270 84% 64%)' }}>DeepGuard</span>
+                  <span className="text-black"> AI</span>
+                </h1>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Title Section */}
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-              Detect AI-Generated Content
+      <main className="container mx-auto px-6 py-16">
+        <div className="max-w-6xl mx-auto">
+          {/* Tag/Chip Centered */}
+          <div className="w-full flex justify-center mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-foreground/80">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              Multi-Model AI Detection
+            </div>
+          </div>
+
+          {/* Main Heading */}
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+              <span className="text-primary">Deepfake Detection</span> Multi-Model System
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Upload images or videos to analyze authenticity using advanced machine learning
-            </p>
           </div>
 
           {/* Dynamic Content Based on State */}
@@ -176,47 +203,110 @@ const Index = () => {
             )}
           </div>
 
-          {/* Info Section */}
-          <div className="mt-16 grid md:grid-cols-3 gap-6">
-            <div className="p-6 bg-card/50 rounded-xl border border-border">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">AI-Powered Analysis</h3>
-              <p className="text-sm text-muted-foreground">
-                Uses ResNet-LSTM-Transformer architecture for accurate detection
+          {/* Hybrid Architecture Section */}
+          <section className="mt-20">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl md:text-3xl font-bold tracking-tight">Hybrid Architecture</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Multi-stage detection pipeline combining spatial, temporal, and contextual analysis
               </p>
             </div>
-            
-            <div className="p-6 bg-card/50 rounded-xl border border-border">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <Layers className="w-5 h-5 text-primary" />
+                  <h4 className="font-semibold">Stage 1: Input Layer</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">Face detection & frame extraction with MTCNN</p>
               </div>
-              <h3 className="font-semibold mb-2">Fast Processing</h3>
-              <p className="text-sm text-muted-foreground">
-                Get results in seconds with optimized inference pipeline
-              </p>
-            </div>
-            
-            <div className="p-6 bg-card/50 rounded-xl border border-border">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-primary" />
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <Grid3X3 className="w-5 h-5 text-primary" />
+                  <h4 className="font-semibold">Stage 2: Feature Extraction</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">ResNet-50 for spatial features, Transformers for patch relationships</p>
               </div>
-              <h3 className="font-semibold mb-2">Privacy First</h3>
-              <p className="text-sm text-muted-foreground">
-                Your files are processed securely and never stored permanently
-              </p>
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <Activity className="w-5 h-5 text-primary" />
+                  <h4 className="font-semibold">Stage 3: Temporal Analysis</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">Bi-LSTM captures sequential inconsistencies across frames</p>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <GitMerge className="w-5 h-5 text-primary" />
+                  <h4 className="font-semibold">Stage 4: Fusion & Decision</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">Transformer attention + classification head</p>
+              </div>
             </div>
-          </div>
+          </section>
+
+          {/* Key Features Section */}
+          <section className="mt-20">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h3 className="text-xl md:text-2xl font-bold tracking-tight">Key Features</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Multi-Head Attention</p>
+                    <p className="text-sm text-muted-foreground">Learns global contextual patterns to detect subtle manipulations</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Ensemble Fusion</p>
+                    <p className="text-sm text-muted-foreground">Combines CNN, LSTM, and Transformer predictions</p>
+                  </div>
+                </li>
+              </ul>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Attention Maps</p>
+                    <p className="text-sm text-muted-foreground">Visualizes manipulated regions for explainable AI</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Real-time Processing</p>
+                    <p className="text-sm text-muted-foreground">Optimized with ONNX/TensorRT for fast inference</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-20">
         <div className="container mx-auto px-6 py-8">
-          <p className="text-center text-sm text-muted-foreground">
-            DeepGuard AI • Advanced deepfake detection powered by machine learning
-          </p>
+          <div className="space-y-4">
+            <p className="text-center text-md text-muted-foreground">
+              DeepGuard AI • Advanced deepfake detection powered by machine learning
+            </p>
+            
+            {/* Group Members Section */}
+            <div className="pt-4 border-t border-border/30">
+              <p className="text-center text-base font-semibold text-foreground/70 mb-2">Developed by:</p>
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                {/* TODO: Replace these placeholder names with your actual group member names */}
+                <span className="text-md text-muted-foreground">Neha</span>
+                <span className="text-md text-muted-foreground">Preetham</span>
+                <span className="text-md text-muted-foreground">Shradha</span>
+                <span className="text-md text-muted-foreground">Yash</span>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
