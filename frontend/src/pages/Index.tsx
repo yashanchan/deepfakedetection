@@ -4,6 +4,7 @@ import { UploadZone } from "@/components/UploadZone";
 import { FilePreview } from "@/components/FilePreview";
 import { ProcessingState } from "@/components/ProcessingState";
 import { ResultDisplay } from "@/components/ResultDisplay";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "@/hooks/use-toast";
 
 type AppState = "upload" | "preview" | "processing" | "result";
@@ -148,12 +149,13 @@ const Index = () => {
                 </div>
               </div>
               
-              {/* Project Name */}
-              <div className="flex items-center">
+              {/* Project Name and Theme Toggle */}
+              <div className="flex items-center gap-4">
                 <h1 className="text-5xl font-bold font-sans tracking-tight">
                   <span style={{ color: 'hsl(270 84% 64%)' }}>DeepGuard</span>
-                  <span className="text-black"> AI</span>
+                  <span className="text-foreground"> AI</span>
                 </h1>
+                <ThemeToggle />
               </div>
             </div>
           </div>
