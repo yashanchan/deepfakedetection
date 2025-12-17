@@ -33,7 +33,7 @@ Designed for high-accuracy decision-making:
 - AI/ML Libraries: PyTorch for model training; Hugging Face Transformers for contextual analysis.
 - Computer Vision: OpenCV and MediaPipe for real-time face tracking and frame extraction.
 
-## Key Results & Business Impact
+## Key Results
 
 - High Reliability: Achieved an F1-Score of 0.8494 and 98% Recall on specific test datasets, ensuring no positive fake samples were missed.
 - Optimized Performance: Processing time is targeted at under 500 milliseconds per video frame on GPU-accelerated hardware.
