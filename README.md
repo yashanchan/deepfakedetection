@@ -25,6 +25,7 @@ Designed for high-accuracy decision-making:
 - Ensemble Decision: Fuses spatial and temporal signals to produce a final classification of "Real" or "Fake".
 - Explainable Output: Generates Grad-CAM heatmaps and attention maps to highlight specific manipulated regions for user transparency.
 
+![Architecture Diagram](docs/arch_dig.png)
 
 ## Tech Stack
 - Languages: Python, ReactJS
